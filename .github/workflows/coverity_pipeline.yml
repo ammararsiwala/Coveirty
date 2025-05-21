@@ -16,8 +16,31 @@ on:
         description: 'Stream Description'
         required: true
       role_name:
-        description: 'Role Name'
+        description: 'Select a Role'
         required: true
+        type: choice
+        options:
+          - componentMapOwner
+          - componentMapViewer
+          - hierarchyAdmin
+          - icUser
+          - noAccess
+          - projectOwner
+          - reporter
+          - streamOwner
+          - sysAdmin
+          - triageStoreOwner
+          - visitor
+          - committer
+          - Committer-Eaton
+          - developer
+          - Eaton Developer
+          - Eaton Project Owner
+          - observer
+          - projectAdmin
+          - serverAdmin
+          - streamAdmin
+          - wsReporter
       assignee_username:
         description: 'Assignee Username'
         required: true
