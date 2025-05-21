@@ -16,10 +16,10 @@ on:
         description: 'Comma-separated Stream Descriptions (e.g., desc-1,desc-2)'
         required: true
       component_map_name:
-        description: 'Component Map Name'
+        description: 'Comma-separated Component Map Names (e.g., map-1,map-2)'
         required: true
       component_map_description:
-        description: 'Component Map Description'
+        description: 'Comma-separated Component Map Descriptions (e.g., desc-1,desc-2)'
         required: true
       role_name:
         description: 'Select a Project Role'
@@ -74,13 +74,20 @@ jobs:
       - name: Install dependencies
         run: pip install requests
 
-      - name: Create Component Map
+      - name: Create Component Maps
         run: |
-          python scripts/create_component_map.py \
-            --name "${{ github.event.inputs.component_map_name }}" \
-            --description "${{ github.event.inputs.component_map_description }}" \
-            --username "$COVERITY_USERNAME" \
-            --apikey "$COVERITY_API_KEY"
+          IFS=',' read -ra MAPS <<< "${{ github.event.inputs.component_map_name }}"
+          IFS=',' read -ra DESCRIPTIONS <<< "${{ github.event.inputs.component_map_description }}"
+          for i in "${!MAPS[@]}"; do
+            map="${MAPS[$i]}"
+            description="${DESCRIPTIONS[$i]}"
+            echo "Creating component map: $map with description: $description"
+            python scripts/create_component_map.py \
+              --name "$map" \
+              --description "$description" \
+              --username "$COVERITY_USERNAME" \
+              --apikey "$COVERITY_API_KEY"
+          done
 
       - name: Create Project
         run: |
