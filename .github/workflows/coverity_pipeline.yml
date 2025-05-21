@@ -16,7 +16,7 @@ on:
         description: 'Stream Description'
         required: true
       role_name:
-        description: 'Select a Role'
+        description: 'Select a Project Role'
         required: true
         type: choice
         options:
@@ -47,9 +47,35 @@ on:
       group_name:
         description: 'Project Group Name (optional)'
         required: false
+      stream_role_name:
+        description: 'Select a Stream Role'
+        required: true
+        type: choice
+        options:
+          - componentMapOwner
+          - componentMapViewer
+          - hierarchyAdmin
+          - icUser
+          - noAccess
+          - projectOwner
+          - reporter
+          - streamOwner
+          - sysAdmin
+          - triageStoreOwner
+          - visitor
+          - committer
+          - Committer-Eaton
+          - developer
+          - Eaton Developer
+          - Eaton Project Owner
+          - observer
+          - projectAdmin
+          - serverAdmin
+          - streamAdmin
+          - wsReporter
       stream_assignee_username:
-        description: 'Stream Assignee Username (optional)'
-        required: false
+        description: 'Stream Assignee Username (required)'
+        required: true
       stream_group_name:
         description: 'Stream Group Name (optional)'
         required: false
@@ -115,12 +141,11 @@ jobs:
             --username "$COVERITY_USERNAME" \
             --apikey "$COVERITY_API_KEY"
 
-      - name: Assign Role to Stream User (if provided)
-        if: ${{ github.event.inputs.stream_assignee_username != '' }}
+      - name: Assign Role to Stream User
         run: |
           python scripts/assign_stream_role.py \
             --stream "${{ github.event.inputs.stream_name }}" \
-            --role "${{ github.event.inputs.role_name }}" \
+            --role "${{ github.event.inputs.stream_role_name }}" \
             --scope "${{ github.event.inputs.scope }}" \
             --username "${{ github.event.inputs.stream_assignee_username }}" \
             --description "${{ github.event.inputs.stream_description }}" \
@@ -134,7 +159,7 @@ jobs:
         run: |
           python scripts/assign_stream_role.py \
             --stream "${{ github.event.inputs.stream_name }}" \
-            --role "${{ github.event.inputs.role_name }}" \
+            --role "${{ github.event.inputs.stream_role_name }}" \
             --scope "${{ github.event.inputs.scope }}" \
             --group "${{ github.event.inputs.stream_group_name }}" \
             --description "${{ github.event.inputs.stream_description }}" \
