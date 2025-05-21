@@ -42,8 +42,8 @@ on:
           - streamAdmin
           - wsReporter
       assignee_username:
-        description: 'Assignee Username (optional)'
-        required: false
+        description: 'Assignee Username (required)'
+        required: true
       group_name:
         description: 'Group Name (optional)'
         required: false
@@ -79,8 +79,7 @@ jobs:
             --username "$COVERITY_USERNAME" \
             --apikey "$COVERITY_API_KEY"
 
-      - name: Assign Role to User (if provided)
-        if: ${{ github.event.inputs.assignee_username != '' }}
+      - name: Assign Role to User
         run: |
           python scripts/update_role.py \
             --project "${{ github.event.inputs.project_name }}" \
