@@ -10,10 +10,10 @@ on:
         description: 'Project Description'
         required: true
       stream_name:
-        description: 'Stream Name'
+        description: 'Comma-separated Stream Names (e.g., stream-1,stream-2)'
         required: true
       stream_description:
-        description: 'Stream Description'
+        description: 'Comma-separated Stream Descriptions (e.g., desc-1,desc-2)'
         required: true
       component_map_name:
         description: 'Component Map Name'
@@ -100,11 +100,18 @@ jobs:
             --assignee "${{ github.event.inputs.assignee_username }}" \
             --scope "${{ github.event.inputs.scope }}"
 
-      - name: Create Stream
+      - name: Create Streams
         run: |
-          python scripts/create_stream.py \
-            --name "${{ github.event.inputs.stream_name }}" \
-            --description "${{ github.event.inputs.stream_description }}" \
-            --project "${{ github.event.inputs.project_name }}" \
-            --username "$COVERITY_USERNAME" \
-            --apikey "$COVERITY_API_KEY"
+          IFS=',' read -ra STREAMS <<< "${{ github.event.inputs.stream_name }}"
+          IFS=',' read -ra DESCRIPTIONS <<< "${{ github.event.inputs.stream_description }}"
+          for i in "${!STREAMS[@]}"; do
+            stream="${STREAMS[$i]}"
+            description="${DESCRIPTIONS[$i]}"
+            echo "Creating stream: $stream with description: $description"
+            python scripts/create_stream.py \
+              --name "$stream" \
+              --description "$description" \
+              --project "${{ github.event.inputs.project_name }}" \
+              --username "$COVERITY_USERNAME" \
+              --apikey "$COVERITY_API_KEY"
+          done
