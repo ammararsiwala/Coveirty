@@ -15,6 +15,12 @@ on:
       stream_description:
         description: 'Stream Description'
         required: true
+      component_map_name:
+        description: 'Component Map Name'
+        required: true
+      component_map_description:
+        description: 'Component Map Description'
+        required: true
       role_name:
         description: 'Select a Project Role'
         required: true
@@ -44,9 +50,6 @@ on:
       assignee_username:
         description: 'Project Assignee Username (required)'
         required: true
-      group_name:
-        description: 'Project Group Name (optional)'
-        required: false
       stream_role_name:
         description: 'Select a Stream Role'
         required: true
@@ -76,9 +79,6 @@ on:
       stream_assignee_username:
         description: 'Stream Assignee Username (required)'
         required: true
-      stream_group_name:
-        description: 'Stream Group Name (optional)'
-        required: false
       scope:
         description: 'Scope'
         required: true
@@ -103,6 +103,14 @@ jobs:
       - name: Install dependencies
         run: pip install requests
 
+      - name: Create Component Map
+        run: |
+          python scripts/create_component_map.py \
+            --name "${{ github.event.inputs.component_map_name }}" \
+            --description "${{ github.event.inputs.component_map_description }}" \
+            --username "$COVERITY_USERNAME" \
+            --apikey "$COVERITY_API_KEY"
+
       - name: Create Project
         run: |
           python scripts/create_project.py \
@@ -121,17 +129,6 @@ jobs:
             --assignee "${{ github.event.inputs.assignee_username }}" \
             --scope "${{ github.event.inputs.scope }}"
 
-      - name: Assign Role to Project Group (if provided)
-        if: ${{ github.event.inputs.group_name != '' }}
-        run: |
-          python scripts/update_group_role.py \
-            --project "${{ github.event.inputs.project_name }}" \
-            --group "${{ github.event.inputs.group_name }}" \
-            --role "${{ github.event.inputs.role_name }}" \
-            --scope "${{ github.event.inputs.scope }}" \
-            --username "$COVERITY_USERNAME" \
-            --apikey "$COVERITY_API_KEY"
-
       - name: Create Stream
         run: |
           python scripts/create_stream.py \
@@ -148,20 +145,6 @@ jobs:
             --role "${{ github.event.inputs.stream_role_name }}" \
             --scope "${{ github.event.inputs.scope }}" \
             --username "${{ github.event.inputs.stream_assignee_username }}" \
-            --description "${{ github.event.inputs.stream_description }}" \
-            --name "${{ github.event.inputs.stream_name }}" \
-            --primary_project_name "${{ github.event.inputs.project_name }}" \
-            --apiuser "$COVERITY_USERNAME" \
-            --apikey "$COVERITY_API_KEY"
-
-      - name: Assign Role to Stream Group (if provided)
-        if: ${{ github.event.inputs.stream_group_name != '' }}
-        run: |
-          python scripts/assign_stream_role.py \
-            --stream "${{ github.event.inputs.stream_name }}" \
-            --role "${{ github.event.inputs.stream_role_name }}" \
-            --scope "${{ github.event.inputs.scope }}" \
-            --group "${{ github.event.inputs.stream_group_name }}" \
             --description "${{ github.event.inputs.stream_description }}" \
             --name "${{ github.event.inputs.stream_name }}" \
             --primary_project_name "${{ github.event.inputs.project_name }}" \
