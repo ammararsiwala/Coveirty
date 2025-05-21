@@ -50,35 +50,6 @@ on:
       assignee_username:
         description: 'Project Assignee Username (required)'
         required: true
-      stream_role_name:
-        description: 'Select a Stream Role'
-        required: true
-        type: choice
-        options:
-          - componentMapOwner
-          - componentMapViewer
-          - hierarchyAdmin
-          - icUser
-          - noAccess
-          - projectOwner
-          - reporter
-          - streamOwner
-          - sysAdmin
-          - triageStoreOwner
-          - visitor
-          - committer
-          - Committer-Eaton
-          - developer
-          - Eaton Developer
-          - Eaton Project Owner
-          - observer
-          - projectAdmin
-          - serverAdmin
-          - streamAdmin
-          - wsReporter
-      stream_assignee_username:
-        description: 'Stream Assignee Username (required)'
-        required: true
       scope:
         description: 'Scope'
         required: true
@@ -136,17 +107,4 @@ jobs:
             --description "${{ github.event.inputs.stream_description }}" \
             --project "${{ github.event.inputs.project_name }}" \
             --username "$COVERITY_USERNAME" \
-            --apikey "$COVERITY_API_KEY"
-
-      - name: Assign Role to Stream User
-        run: |
-          python scripts/assign_stream_role.py \
-            --stream "${{ github.event.inputs.stream_name }}" \
-            --role "${{ github.event.inputs.stream_role_name }}" \
-            --scope "${{ github.event.inputs.scope }}" \
-            --username "${{ github.event.inputs.stream_assignee_username }}" \
-            --description "${{ github.event.inputs.stream_description }}" \
-            --name "${{ github.event.inputs.stream_name }}" \
-            --primary_project_name "${{ github.event.inputs.project_name }}" \
-            --apiuser "$COVERITY_USERNAME" \
             --apikey "$COVERITY_API_KEY"
