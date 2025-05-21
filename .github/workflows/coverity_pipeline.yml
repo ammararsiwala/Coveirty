@@ -42,10 +42,16 @@ on:
           - streamAdmin
           - wsReporter
       assignee_username:
-        description: 'Assignee Username (required)'
+        description: 'Project Assignee Username (required)'
         required: true
       group_name:
-        description: 'Group Name (optional)'
+        description: 'Project Group Name (optional)'
+        required: false
+      stream_assignee_username:
+        description: 'Stream Assignee Username (optional)'
+        required: false
+      stream_group_name:
+        description: 'Stream Group Name (optional)'
         required: false
       scope:
         description: 'Scope'
@@ -79,7 +85,7 @@ jobs:
             --username "$COVERITY_USERNAME" \
             --apikey "$COVERITY_API_KEY"
 
-      - name: Assign Role to User
+      - name: Assign Role to Project User
         run: |
           python scripts/update_role.py \
             --project "${{ github.event.inputs.project_name }}" \
@@ -89,7 +95,7 @@ jobs:
             --assignee "${{ github.event.inputs.assignee_username }}" \
             --scope "${{ github.event.inputs.scope }}"
 
-      - name: Assign Role to Group (if provided)
+      - name: Assign Role to Project Group (if provided)
         if: ${{ github.event.inputs.group_name != '' }}
         run: |
           python scripts/update_group_role.py \
@@ -107,4 +113,32 @@ jobs:
             --description "${{ github.event.inputs.stream_description }}" \
             --project "${{ github.event.inputs.project_name }}" \
             --username "$COVERITY_USERNAME" \
+            --apikey "$COVERITY_API_KEY"
+
+      - name: Assign Role to Stream User (if provided)
+        if: ${{ github.event.inputs.stream_assignee_username != '' }}
+        run: |
+          python scripts/assign_stream_role.py \
+            --stream "${{ github.event.inputs.stream_name }}" \
+            --role "${{ github.event.inputs.role_name }}" \
+            --scope "${{ github.event.inputs.scope }}" \
+            --username "${{ github.event.inputs.stream_assignee_username }}" \
+            --description "${{ github.event.inputs.stream_description }}" \
+            --name "${{ github.event.inputs.stream_name }}" \
+            --primary_project_name "${{ github.event.inputs.project_name }}" \
+            --apiuser "$COVERITY_USERNAME" \
+            --apikey "$COVERITY_API_KEY"
+
+      - name: Assign Role to Stream Group (if provided)
+        if: ${{ github.event.inputs.stream_group_name != '' }}
+        run: |
+          python scripts/assign_stream_role.py \
+            --stream "${{ github.event.inputs.stream_name }}" \
+            --role "${{ github.event.inputs.role_name }}" \
+            --scope "${{ github.event.inputs.scope }}" \
+            --group "${{ github.event.inputs.stream_group_name }}" \
+            --description "${{ github.event.inputs.stream_description }}" \
+            --name "${{ github.event.inputs.stream_name }}" \
+            --primary_project_name "${{ github.event.inputs.project_name }}" \
+            --apiuser "$COVERITY_USERNAME" \
             --apikey "$COVERITY_API_KEY"
