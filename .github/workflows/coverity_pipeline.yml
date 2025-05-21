@@ -1,0 +1,73 @@
+name: Coverity Project Pipeline
+
+on:
+  workflow_dispatch:
+    inputs:
+      project_name:
+        description: 'Project Name'
+        required: true
+      project_description:
+        description: 'Project Description'
+        required: true
+      stream_name:
+        description: 'Stream Name'
+        required: true
+      stream_description:
+        description: 'Stream Description'
+        required: true
+      role_name:
+        description: 'Role Name'
+        required: true
+      assignee_username:
+        description: 'Assignee Username'
+        required: true
+      scope:
+        description: 'Scope'
+        required: true
+
+jobs:
+  run-pipeline:
+    runs-on: ubuntu-latest
+
+    env:
+      COVERITY_USERNAME: ${{ secrets.COVERITY_USERNAME }}
+      COVERITY_API_KEY: ${{ secrets.COVERITY_API_KEY }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Create Project
+        run: |
+          python scripts/create_project.py \
+            --name "${{ github.event.inputs.project_name }}" \
+            --description "${{ github.event.inputs.project_description }}" \
+            --username "$COVERITY_USERNAME" \
+            --apikey "$COVERITY_API_KEY"
+
+      - name: Update Role
+        run: |
+          python scripts/update_role.py \
+            --project "${{ github.event.inputs.project_name }}" \
+            --role "${{ github.event.inputs.role_name }}" \
+            --username "$COVERITY_USERNAME" \
+            --apikey "$COVERITY_API_KEY" \
+            --assignee "${{ github.event.inputs.assignee_username }}" \
+            --scope "${{ github.event.inputs.scope }}"
+
+      - name: Create Stream
+        run: |
+          python scripts/create_stream.py \
+            --name "${{ github.event.inputs.stream_name }}" \
+            --description "${{ github.event.inputs.stream_description }}" \
+            --project "${{ github.event.inputs.project_name }}" \
+            --username "$COVERITY_USERNAME" \
+            --apikey "$COVERITY_API_KEY"
